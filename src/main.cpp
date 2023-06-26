@@ -1,6 +1,10 @@
 #include <iostream>
+#include "model/Playlist.h"
+
 
 int main()
 {
-	std::cout << "Eeeeeeeeeet zéparti !" << std::endl;
+	Playlist playlist("test");
+
+	std::cout << "aze" << std::endl;
 }
