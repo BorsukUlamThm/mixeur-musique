@@ -31,6 +31,16 @@ std::string& Playlist::operator[](unsigned int i)
 	return tracks[i];
 }
 
+bool Playlist::empty() const
+{
+	return tracks.empty();
+}
+
+unsigned Playlist::size() const
+{
+	return tracks.size();
+}
+
 void Playlist::add_track(const std::string& track)
 {
 	tracks.emplace_back(track);

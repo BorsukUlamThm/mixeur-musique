@@ -1,4 +1,5 @@
 #pragma once
+
 #include <vector>
 #include <string>
 
@@ -10,10 +11,12 @@ private:
 
 public:
 	Playlist() = default;
-	Playlist(const std::string& file);
+	explicit Playlist(const std::string& file);
 
 	std::string operator[](unsigned i) const;
 	std::string& operator[](unsigned i);
+	bool empty() const;
+	unsigned size() const;
 
 	void add_track(const std::string& track);
 };

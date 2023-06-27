@@ -16,6 +16,8 @@ add_executable(${exe_name}
         src/main.cpp
         src/model/Playlist.h
         src/model/Playlist.cpp
+        src/view/Canvas.h
+        src/view/Canvas.cpp
         )
 
 target_link_libraries(${exe_name} -lsfml-graphics -lsfml-window -lsfml-system -lsfml-audio)
