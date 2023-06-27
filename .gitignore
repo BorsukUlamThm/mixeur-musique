@@ -46,3 +46,5 @@ data/logs
 # CLion stuff
 .idea/*
 
+# Musics are too big
+data/musiques
