@@ -23,7 +23,7 @@ void Canvas::open()
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 
-	window.create(sf::VideoMode::getDesktopMode(),
+	window.create(sf::VideoMode(500, font_size * (2 + 20 * track_height_ratio)),
 				  "Mixeur musique",
 				  sf::Style::Default,
 				  settings);
@@ -32,13 +32,14 @@ void Canvas::open()
 	size_y = float(window.getSize().y);
 }
 
+/*
 void Canvas::setup_view()
 {
 	float box_size = 1.0f;
-	float x_min = -box_size;
-	float x_max = box_size;
-	float y_min = -box_size;
-	float y_max = box_size;
+	float x_min = 0;
+	float x_max = 1 * box_size;
+	float y_min = 0;
+	float y_max = 5 * box_size;
 
 	float window_format = size_x / size_y;
 	float figure_format = (x_max - x_min) / (y_max - y_min);
@@ -52,15 +53,16 @@ void Canvas::setup_view()
 
 	view.setCenter((x_min + x_max) / 2, (y_min + y_max) / 2);
 	window.setView(view);
-}
+}*/
 
 void Canvas::start()
 {
 	open();
-	setup_view();
+	//setup_view();
 	while (window.isOpen())
 	{
 		handle_events();
+		display_tracks();
 		window.display();
 	}
 }
@@ -70,9 +72,7 @@ void Canvas::handle_events()
 	if (state == PLAY &&
 		music_index < playlist.size() - 1 &&
 		music.getStatus() == sf::SoundSource::Status::Stopped)
-	{
-		next_track();
-	}
+	{ next_track(); }
 
 	sf::Event event {};
 	while (window.pollEvent(event))
@@ -86,7 +86,7 @@ void Canvas::handle_events()
 			case sf::Event::Resized:
 				size_x = float(event.size.width);
 				size_y = float(event.size.height);
-				setup_view();
+				//setup_view();
 				break;
 
 			case sf::Event::KeyPressed:
@@ -152,12 +152,10 @@ void Canvas::load_music()
 	std::string musics_dir = "../data/musiques/";
 	music.openFromFile(musics_dir + playlist[music_index] + ".wav");
 
-	print_current_track();
+	//print_current_track();
 
 	if (state == PLAY)
-	{
-		music.play();
-	}
+	{ music.play(); }
 }
 
 void Canvas::print_current_track() const
@@ -188,8 +186,110 @@ void Canvas::next_track()
 	setup();
 }
 
+void Canvas::display_tracks()
+{
+	display_background();
+	for (unsigned i = 0; i < playlist.size(); ++i)
+	{ display_track(i); }
 
+	if (state == PLAY)
+	{ display_play_item(); }
+	else
+	{ display_pause_item(); }
+}
 
+void Canvas::display_background()
+{
+	sf::VertexArray quad(sf::Quads, 4);
+
+	float xm = 0;
+	float xM = 3000;
+	float ym = 0;
+	float yM = 2000;
+
+	quad[0].position = sf::Vector2f(xm, ym);
+	quad[1].position = sf::Vector2f(xm, yM);
+	quad[2].position = sf::Vector2f(xM, yM);
+	quad[3].position = sf::Vector2f(xM, ym);
+
+	for (unsigned i = 0; i < 4; ++i)
+	{ quad[i].color = sf::Color::White; }
+
+	window.draw(quad);
+}
+
+void Canvas::display_track(unsigned i)
+{
+	sf::Text shape;
+	shape.setFont(font);
+	shape.setCharacterSize(font_size);
+	shape.setString(playlist[i]);
+
+	shape.move(float(font_size) * (1 + track_height_ratio),
+			   float(font_size) *
+			   (1 + float(i) * track_height_ratio));
+	shape.setFillColor(sf::Color::Black);
+
+	window.draw(shape);
+}
+
+void Canvas::display_play_item()
+{
+	sf::VertexArray triangle(sf::Quads, 4);
+
+	float x = float(font_size);
+	float y = float(font_size) *
+			  (1.1 + float(music_index) * track_height_ratio);
+	float y1 = y + float(font_size);
+	float x2 = x + float(font_size);
+	float y2 = y + float(font_size) / 2;
+
+	triangle[0].position = sf::Vector2f(x, y);
+	triangle[1].position = sf::Vector2f(x, y1);
+	triangle[2].position = sf::Vector2f(x2, y2);
+	triangle[3].position = sf::Vector2f(x, y);
+
+	for (unsigned i = 0; i < 4; ++i)
+	{ triangle[i].color = sf::Color::Black; }
+
+	window.draw(triangle);
+}
+
+void Canvas::display_pause_item()
+{
+	sf::VertexArray quad1(sf::Quads, 4);
+	sf::VertexArray quad2(sf::Quads, 4);
+
+	float xm = float(font_size);
+	float xM = 2 * float(font_size);
+	float ym = float(font_size) *
+			   (1.1 + float(music_index) * track_height_ratio);
+	float yM = ym + float(font_size);
+	float quad_length_ratio = 0.28;
+
+	quad1[0].position = sf::Vector2f(xm, ym);
+	quad1[1].position = sf::Vector2f(xm, yM);
+	quad1[2].position = sf::Vector2f(xm + quad_length_ratio *
+										  float(font_size), yM);
+	quad1[3].position = sf::Vector2f(xm + quad_length_ratio *
+										  float(font_size), ym);
+
+	quad2[0].position = sf::Vector2f(xm + (1 - quad_length_ratio) *
+										  float(font_size), ym);
+	quad2[1].position = sf::Vector2f(xm + (1 - quad_length_ratio) *
+										  float(font_size), yM);
+	quad2[2].position = sf::Vector2f(xM, yM);
+	quad2[3].position = sf::Vector2f(xM, ym);
+
+	for (unsigned i = 0; i < 4; ++i)
+	{
+		quad1[i].color = sf::Color::Black;
+		quad2[i].color = sf::Color::Black;
+	}
+
+	window.draw(quad1);
+	window.draw(quad2);
+}
 
 
 
