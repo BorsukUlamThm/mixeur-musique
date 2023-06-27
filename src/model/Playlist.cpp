@@ -1,5 +1,6 @@
 #include "Playlist.h"
 #include <fstream>
+#include <sstream>
 
 
 Playlist::Playlist(const std::string& file)
@@ -17,7 +18,21 @@ Playlist::Playlist(const std::string& file)
 		if (line.empty())
 		{ continue; }
 
-		add_track(line);
+		std::vector<std::string> words;
+		std::istringstream iss(line);
+
+		for (std::string s; iss >> s;)
+		{ words.push_back(s); }
+
+		if (words.empty())
+		{ continue; }
+
+		add_track(words[0]);
+
+		if (words.size() > 1 && words[1] == "L")
+		{ loops.push_back(true); }
+		else
+		{ loops.push_back(false); }
 	}
 }
 

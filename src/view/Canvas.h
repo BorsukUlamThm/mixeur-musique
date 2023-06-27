@@ -29,6 +29,7 @@ protected:
 
 	sf::Music music;
 	unsigned music_index = 0;
+	unsigned highlight_index = 0;
 
 public:
 	Canvas() = default;
@@ -49,6 +50,7 @@ protected:
 
 	void prev_track();
 	void next_track();
+	void flip_highlighted_loop_boolean();
 
 	void display_tracks();
 	void display_background();

@@ -70,9 +70,13 @@ void Canvas::start()
 void Canvas::handle_events()
 {
 	if (state == PLAY &&
-		music_index < playlist.size() - 1 &&
 		music.getStatus() == sf::SoundSource::Status::Stopped)
-	{ next_track(); }
+	{
+		if (playlist.loops[music_index])
+		{ load_music(); }
+		else if (music_index < playlist.size() - 1)
+		{ next_track(); }
+	}
 
 	sf::Event event {};
 	while (window.pollEvent(event))
@@ -139,6 +143,24 @@ void Canvas::handle_key_pressed_event(const sf::Event& event)
 			next_track();
 			break;
 
+		case sf::Keyboard::Up:
+			if (highlight_index == 0)
+			{ break; }
+
+			highlight_index--;
+			break;
+
+		case sf::Keyboard::Down:
+			if (highlight_index == playlist.size() - 1)
+			{ break; }
+
+			highlight_index++;
+			break;
+
+		case sf::Keyboard::L:
+			flip_highlighted_loop_boolean();
+			break;
+
 		default:
 			break;
 	}
@@ -186,6 +208,11 @@ void Canvas::next_track()
 	setup();
 }
 
+void Canvas::flip_highlighted_loop_boolean()
+{
+	playlist.loops[highlight_index] = !playlist.loops[highlight_index];
+}
+
 void Canvas::display_tracks()
 {
 	display_background();
@@ -220,17 +247,20 @@ void Canvas::display_background()
 
 void Canvas::display_track(unsigned i)
 {
-	sf::Text shape;
-	shape.setFont(font);
-	shape.setCharacterSize(font_size);
-	shape.setString(playlist[i]);
+	sf::Text text;
+	text.setFont(font);
+	text.setCharacterSize(font_size);
+	text.setString(playlist[i] + (playlist.loops[i] ? "   L" : ""));
 
-	shape.move(float(font_size) * (1 + track_height_ratio),
-			   float(font_size) *
-			   (1 + float(i) * track_height_ratio));
-	shape.setFillColor(sf::Color::Black);
+	if (i == highlight_index)
+	{ text.setStyle(sf::Text::Bold); }
 
-	window.draw(shape);
+	text.move(float(font_size) * (1 + track_height_ratio),
+			  float(font_size) *
+			  (1 + float(i) * track_height_ratio));
+	text.setFillColor(sf::Color::Black);
+
+	window.draw(text);
 }
 
 void Canvas::display_play_item()

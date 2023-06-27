@@ -6,8 +6,9 @@
 
 class Playlist
 {
-private:
+public:
 	std::vector<std::string> tracks;
+	std::vector<bool> loops;
 
 public:
 	Playlist() = default;
