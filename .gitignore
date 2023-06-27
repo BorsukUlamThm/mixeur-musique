@@ -47,4 +47,4 @@ data/logs
 .idea/*
 
 # Musics are too big
-# data/musiques
+data/musiques
