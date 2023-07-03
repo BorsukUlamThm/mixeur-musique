@@ -62,7 +62,7 @@ void Canvas::start()
 	while (window.isOpen())
 	{
 		handle_events();
-		display_tracks();
+		display_everything();
 		window.display();
 	}
 }
@@ -213,16 +213,23 @@ void Canvas::flip_highlighted_loop_boolean()
 	playlist.loops[highlight_index] = !playlist.loops[highlight_index];
 }
 
-void Canvas::display_tracks()
+void Canvas::display_everything()
 {
 	display_background();
-	for (unsigned i = 0; i < playlist.size(); ++i)
-	{ display_track(i); }
+	display_tracks();
 
 	if (state == PLAY)
 	{ display_play_item(); }
 	else
 	{ display_pause_item(); }
+
+	display_advancement_bar();
+}
+
+void Canvas::display_tracks()
+{
+	for (unsigned i = 0; i < playlist.size(); ++i)
+	{ display_track(i); }
 }
 
 void Canvas::display_background()
@@ -257,7 +264,7 @@ void Canvas::display_track(unsigned i)
 
 	text.move(float(font_size) * (1 + track_height_ratio),
 			  float(font_size) *
-			  (1 + float(i) * track_height_ratio));
+			  (2 + float(i) * track_height_ratio));
 	text.setFillColor(sf::Color::Black);
 
 	window.draw(text);
@@ -269,7 +276,7 @@ void Canvas::display_play_item()
 
 	float x = float(font_size);
 	float y = float(font_size) *
-			  (1.1 + float(music_index) * track_height_ratio);
+			  (2.1 + float(music_index) * track_height_ratio);
 	float y1 = y + float(font_size);
 	float x2 = x + float(font_size);
 	float y2 = y + float(font_size) / 2;
@@ -293,7 +300,7 @@ void Canvas::display_pause_item()
 	float xm = float(font_size);
 	float xM = 2 * float(font_size);
 	float ym = float(font_size) *
-			   (1.1 + float(music_index) * track_height_ratio);
+			   (2.1 + float(music_index) * track_height_ratio);
 	float yM = ym + float(font_size);
 	float quad_length_ratio = 0.28;
 
@@ -321,7 +328,46 @@ void Canvas::display_pause_item()
 	window.draw(quad2);
 }
 
+void Canvas::display_advancement_bar()
+{
+	float bar_width = float(font_size) * 0.7;
+	float inside_offset = bar_width / 3;
 
+	sf::VertexArray container(sf::Quads, 4);
+	sf::VertexArray white_bar(sf::Quads, 4);
+
+	float xm = float(font_size) * (1 + track_height_ratio);
+	float xM = 500.0f - xm;
+	float ym = float(font_size) * 0.9;
+	float yM = ym + bar_width;
+
+	container[0].position = sf::Vector2f(xm, ym);
+	container[1].position = sf::Vector2f(xM, ym);
+	container[2].position = sf::Vector2f(xM, yM);
+	container[3].position = sf::Vector2f(xm, yM);
+
+	xm += inside_offset;
+	ym += inside_offset;
+	xM -= inside_offset;
+	yM -= inside_offset;
+	float white_bar_length = (xM - xm)
+							 * music.getPlayingOffset().asSeconds()
+							 / music.getDuration().asSeconds();
+
+	white_bar[0].position = sf::Vector2f(xm, ym);
+	white_bar[1].position = sf::Vector2f(xm + white_bar_length, ym);
+	white_bar[2].position = sf::Vector2f(xm + white_bar_length, yM);
+	white_bar[3].position = sf::Vector2f(xm, yM);
+
+	for (unsigned i = 0; i < 4; ++i)
+	{
+		container[i].color = sf::Color::Black;
+		white_bar[i].color = sf::Color::White;
+	}
+
+	window.draw(container);
+	window.draw(white_bar);
+}
 
 
 

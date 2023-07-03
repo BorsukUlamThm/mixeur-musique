@@ -52,10 +52,12 @@ protected:
 	void next_track();
 	void flip_highlighted_loop_boolean();
 
+	void display_everything();
 	void display_tracks();
 	void display_background();
 	void display_track(unsigned i);
 	void display_play_item();
 	void display_pause_item();
+	void display_advancement_bar();
 };
 
