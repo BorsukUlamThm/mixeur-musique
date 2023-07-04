@@ -271,12 +271,6 @@ void Canvas::display_all()
 	display_advancement_bar();
 }
 
-void Canvas::display_tracks()
-{
-	for (unsigned i = 0; i < playlist.size(); ++i)
-	{ display_track(i); }
-}
-
 void Canvas::display_background()
 {
 	sf::VertexArray quad(sf::Quads, 4);
@@ -297,6 +291,24 @@ void Canvas::display_background()
 	window.draw(quad);
 }
 
+void Canvas::display_tracks()
+{
+	sf::Text text;
+	text.setFont(font);
+	text.setCharacterSize(font_size);
+	text.setString("Playlist");
+//	text.setStyle(sf::Text::Underlined);
+
+	text.move(float(font_size) * (2 + track_height_ratio),
+			  float(font_size) * 2);
+	text.setFillColor(sf::Color::Black);
+
+	window.draw(text);
+
+	for (unsigned i = 0; i < playlist.size(); ++i)
+	{ display_track(i); }
+}
+
 void Canvas::display_track(unsigned i)
 {
 	sf::Text text;
@@ -307,9 +319,9 @@ void Canvas::display_track(unsigned i)
 	if (i == highlight_index)
 	{ text.setStyle(sf::Text::Bold); }
 
-	text.move(float(font_size) * (1 + track_height_ratio),
+	text.move(float(font_size) * (2 + track_height_ratio),
 			  float(font_size) *
-			  (2 + float(i) * track_height_ratio));
+			  (4 + float(i) * track_height_ratio));
 	text.setFillColor(sf::Color::Black);
 
 	window.draw(text);
@@ -319,9 +331,9 @@ void Canvas::display_play_item()
 {
 	sf::VertexArray triangle(sf::Quads, 4);
 
-	float x = float(font_size);
+	float x = float(font_size) * 2;
 	float y = float(font_size) *
-			  (2.1 + float(music_index) * track_height_ratio);
+			  (4.1 + float(music_index) * track_height_ratio);
 	float y1 = y + float(font_size);
 	float x2 = x + float(font_size);
 	float y2 = y + float(font_size) / 2;
@@ -342,10 +354,10 @@ void Canvas::display_pause_item()
 	sf::VertexArray quad1(sf::Quads, 4);
 	sf::VertexArray quad2(sf::Quads, 4);
 
-	float xm = float(font_size);
-	float xM = 2 * float(font_size);
+	float xm = float(font_size) * 2;
+	float xM = xm + float(font_size);
 	float ym = float(font_size) *
-			   (2.1 + float(music_index) * track_height_ratio);
+			   (4.1 + float(music_index) * track_height_ratio);
 	float yM = ym + float(font_size);
 	float quad_length_ratio = 0.28;
 
@@ -381,7 +393,7 @@ void Canvas::display_advancement_bar()
 	sf::VertexArray container(sf::Quads, 4);
 	sf::VertexArray white_bar(sf::Quads, 4);
 
-	float xm = float(font_size) * (1 + track_height_ratio);
+	float xm = float(font_size) * track_height_ratio;
 	float xM = window_width - xm;
 	float ym = float(font_size) * 0.9;
 	float yM = ym + bar_width;
@@ -416,6 +428,19 @@ void Canvas::display_advancement_bar()
 
 void Canvas::display_sounds()
 {
+	float ratio = 0.55;
+
+	sf::Text title;
+	title.setFont(font);
+	title.setCharacterSize(font_size);
+	title.setString("Sound box");
+
+	title.move(window_width * ratio,
+			  float(font_size) * 2);
+	title.setFillColor(sf::Color::Black);
+
+	window.draw(title);
+
 	unsigned i = 0;
 	for (auto& ks : sounds)
 	{
@@ -425,13 +450,13 @@ void Canvas::display_sounds()
 
 		std::string line;
 		line += char('A' + ks.first);
-		line += ' ';
+		line += "   ";
 		line += ks.second.name;
 		text.setString(line);
 
-		text.move(window_width / 2,
+		text.move(window_width * ratio,
 				  float(font_size) *
-				  (2 + float(i) * track_height_ratio));
+				  (4 + float(i) * track_height_ratio));
 		text.setFillColor(sf::Color::Black);
 
 		window.draw(text);

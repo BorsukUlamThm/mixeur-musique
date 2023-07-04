@@ -62,8 +62,8 @@ protected:
 	void flip_highlighted_loop_boolean();
 
 	void display_all();
-	void display_tracks();
 	void display_background();
+	void display_tracks();
 	void display_track(unsigned i);
 	void display_play_item();
 	void display_pause_item();
