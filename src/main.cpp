@@ -6,6 +6,6 @@
 int main()
 {
 	Playlist playlist("test");
-	Canvas canvas(playlist);
+	Canvas canvas(playlist, "test");
 	canvas.start();
 }

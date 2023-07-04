@@ -3,18 +3,25 @@
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
+#include <map>
 #include "../model/Playlist.h"
 
+
+struct Sound_player
+{
+	std::string name;
+	sf::SoundBuffer buffer;
+	sf::Sound player;
+
+	Sound_player() = default;
+};
 
 class Canvas
 {
 protected:
 	sf::RenderWindow window;
-	//sf::View view;
+	float window_width = 500;
 	Playlist playlist;
-
-	float size_x = 0;
-	float size_y = 0;
 
 	sf::Font font;
 	unsigned font_size = 16;
@@ -31,9 +38,11 @@ protected:
 	unsigned music_index = 0;
 	unsigned highlight_index = 0;
 
+	std::map<sf::Keyboard::Key, Sound_player> sounds;
+
 public:
 	Canvas() = default;
-	explicit Canvas(Playlist playlist);
+	Canvas(Playlist playlist, const std::string& sound_box_file);
 	void start();
 
 protected:
@@ -52,12 +61,13 @@ protected:
 	void next_track();
 	void flip_highlighted_loop_boolean();
 
-	void display_everything();
+	void display_all();
 	void display_tracks();
 	void display_background();
 	void display_track(unsigned i);
 	void display_play_item();
 	void display_pause_item();
 	void display_advancement_bar();
+	void display_sounds();
 };
 

@@ -1,5 +1,7 @@
 #include "Canvas.h"
 #include <iostream>
+#include <fstream>
+#include <sstream>
 
 
 void Canvas::setup()
@@ -8,9 +10,57 @@ void Canvas::setup()
 	load_music();
 }
 
-Canvas::Canvas(Playlist playlist) :
+Canvas::Canvas(Playlist playlist, const std::string& sound_box_file) :
 		playlist(std::move(playlist))
 {
+	std::string path("../data/sound-boxes/");
+	path += sound_box_file;
+	std::ifstream ifs(path);
+
+	std::string line;
+	while (!ifs.eof())
+	{
+		std::getline(ifs, line);
+		if (line[0] == '#')
+		{ continue; }
+		if (line.empty())
+		{ continue; }
+
+		std::vector<std::string> words;
+		std::istringstream iss(line);
+
+		for (std::string s; iss >> s;)
+		{ words.push_back(s); }
+
+		if (words.empty())
+		{ continue; }
+		if (words[0].size() > 1)
+		{
+			std::cout << "Sound key must be a letter sorry."
+					  << "Key " << words[0] << " ignored" << std::endl;
+			continue;
+		}
+		char key = words[0][0];
+		sf::Keyboard::Key sfkey;
+
+		if ('a' <= key && key <= 'z')
+		{ sfkey = sf::Keyboard::Key(key - 'a'); }
+		else if ('A' <= key && key <= 'Z')
+		{ sfkey = sf::Keyboard::Key(key - 'A'); }
+		else
+		{
+			std::cout << "Sound key must be a letter sorry."
+					  << "Key " << key << " ignored" << std::endl;
+			sfkey = sf::Keyboard::Unknown;
+		}
+
+		sounds[sfkey] = Sound_player();
+		sounds[sfkey].name = words[1];
+
+		std::string sounds_dir = "../data/sounds/";
+		sounds[sfkey].buffer.loadFromFile(sounds_dir + words[1] + ".wav");
+		sounds[sfkey].player.setBuffer(sounds[sfkey].buffer);
+	}
 	setup();
 }
 
@@ -23,13 +73,11 @@ void Canvas::open()
 	sf::ContextSettings settings;
 	settings.antialiasingLevel = 8;
 
-	window.create(sf::VideoMode(500, font_size * (2 + 20 * track_height_ratio)),
+	window.create(sf::VideoMode(window_width,
+								font_size * (2 + 20 * track_height_ratio)),
 				  "Mixeur musique",
 				  sf::Style::Default,
 				  settings);
-
-	size_x = float(window.getSize().x);
-	size_y = float(window.getSize().y);
 }
 
 /*
@@ -62,7 +110,7 @@ void Canvas::start()
 	while (window.isOpen())
 	{
 		handle_events();
-		display_everything();
+		display_all();
 		window.display();
 	}
 }
@@ -85,12 +133,6 @@ void Canvas::handle_events()
 		{
 			case sf::Event::Closed:
 				window.close();
-				break;
-
-			case sf::Event::Resized:
-				size_x = float(event.size.width);
-				size_y = float(event.size.height);
-				//setup_view();
 				break;
 
 			case sf::Event::KeyPressed:
@@ -162,6 +204,8 @@ void Canvas::handle_key_pressed_event(const sf::Event& event)
 			break;
 
 		default:
+			if (sounds.find(event.key.code) != sounds.end())
+			{ sounds[event.key.code].player.play(); }
 			break;
 	}
 }
@@ -213,10 +257,11 @@ void Canvas::flip_highlighted_loop_boolean()
 	playlist.loops[highlight_index] = !playlist.loops[highlight_index];
 }
 
-void Canvas::display_everything()
+void Canvas::display_all()
 {
 	display_background();
 	display_tracks();
+	display_sounds();
 
 	if (state == PLAY)
 	{ display_play_item(); }
@@ -337,7 +382,7 @@ void Canvas::display_advancement_bar()
 	sf::VertexArray white_bar(sf::Quads, 4);
 
 	float xm = float(font_size) * (1 + track_height_ratio);
-	float xM = 500.0f - xm;
+	float xM = window_width - xm;
 	float ym = float(font_size) * 0.9;
 	float yM = ym + bar_width;
 
@@ -369,7 +414,31 @@ void Canvas::display_advancement_bar()
 	window.draw(white_bar);
 }
 
+void Canvas::display_sounds()
+{
+	unsigned i = 0;
+	for (auto& ks : sounds)
+	{
+		sf::Text text;
+		text.setFont(font);
+		text.setCharacterSize(font_size);
 
+		std::string line;
+		line += char('A' + ks.first);
+		line += ' ';
+		line += ks.second.name;
+		text.setString(line);
+
+		text.move(window_width / 2,
+				  float(font_size) *
+				  (2 + float(i) * track_height_ratio));
+		text.setFillColor(sf::Color::Black);
+
+		window.draw(text);
+
+		++i;
+	}
+}
 
 
 
