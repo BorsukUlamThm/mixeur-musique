@@ -39,6 +39,7 @@ protected:
 	unsigned highlight_index = 0;
 
 	std::map<sf::Keyboard::Key, Sound_player> sounds;
+	std::vector<std::string> sounds_names;
 
 public:
 	Canvas() = default;

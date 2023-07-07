@@ -54,6 +54,9 @@ Canvas::Canvas(Playlist playlist, const std::string& sound_box_file) :
 			sfkey = sf::Keyboard::Unknown;
 		}
 
+		std::string name = words[0] + "   " + words[1];
+		sounds_names.push_back(name);
+
 		sounds[sfkey] = Sound_player();
 		sounds[sfkey].name = words[1];
 
@@ -441,18 +444,13 @@ void Canvas::display_sounds()
 
 	window.draw(title);
 
-	unsigned i = 0;
-	for (auto& ks : sounds)
+	for (unsigned i = 0; i < sounds_names.size(); ++i)
 	{
 		sf::Text text;
 		text.setFont(font);
 		text.setCharacterSize(font_size);
 
-		std::string line;
-		line += char('A' + ks.first);
-		line += "   ";
-		line += ks.second.name;
-		text.setString(line);
+		text.setString(sounds_names[i]);
 
 		text.move(window_width * ratio,
 				  float(font_size) *
@@ -460,8 +458,6 @@ void Canvas::display_sounds()
 		text.setFillColor(sf::Color::Black);
 
 		window.draw(text);
-
-		++i;
 	}
 }
 
